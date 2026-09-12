@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Чат — {{ post.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    💬 Чат: {{ post.title }}
+                </h5>
+                <span class="badge">{{ post.game.name }}</span>
+            </div>
+
+            <div class="card-body" id="chat-log"
+                 style="height: 400px; overflow-y: auto; background: #0a1929; border-radius: 4px;">
+                <div class="text-center text-muted small">
+                    Добро пожаловать в чат! Сообщения видны всем участникам.
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <div class="input-group">
+                    <input type="text" id="chat-input" class="form-control"
+                           placeholder="Введите сообщение..." autocomplete="off">
+                    <button class="btn btn-primary" id="chat-send">
+                        <i class="bi bi-send"></i> Отправить
+                    </button>
+                </div>
+                <small class="text-muted d-block mt-2">
+                    Нажмите Enter для отправки
+                </small>
+            </div>
+        </div>
+
+        <a href="{% url 'lfg_detail' post.pk %}" class="btn btn-secondary mt-3">
+            ← Вернуться к объявлению
+        </a>
+    </div>
+</div>
+
+<script>
+    // ID поста из контекста Django
+    const postId = {{ post.pk }};
+
+    const chatLog = document.getElementById('chat-log');
+    const chatInput = document.getElementById('chat-input');
+    const chatSend = document.getElementById('chat-send');
+
+    // Определяем протокол ws:// или wss://
+    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    const chatSocket = new WebSocket(protocol + window.location.host + '/ws/chat/' + postId + '/');
+
+    // Функция добавления сообщения в лог
+    function addMessage(html, classes) {
+        const div = document.createElement('div');
+        div.className = 'mb-2 p-2 rounded ' + (classes || 'bg-dark');
+        div.innerHTML = html;
+        chatLog.appendChild(div);
+        chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    // Обработка входящих сообщений
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+
+        if (data.type === 'system') {
+            addMessage(data.message, 'text-center text-muted small');
+        } else {
+            const html = `<strong style="color:#7b2ff7">${escapeHtml(data.username)}:</strong> ${escapeHtml(data.message)}`;
+            addMessage(html);
+        }
+    };
+
+    // Обработка закрытия соединения
+    chatSocket.onclose = function(e) {
+        addMessage('⚠ Соединение закрыто. Обновите страницу.', 'text-danger text-center small');
+    };
+
+    // Обработка ошибок
+    chatSocket.onerror = function(e) {
+        console.error('WebSocket error:', e);
+    };
+
+    // Отправка сообщения
+    function sendMessage() {
+        const message = chatInput.value.trim();
+        if (!message) return;
+
+        if (chatSocket.readyState !== WebSocket.OPEN) {
+            alert('Соединение не установлено. Обновите страницу.');
+            return;
+        }
+
+        chatSocket.send(JSON.stringify({ 'message': message }));
+        chatInput.value = '';
+        chatInput.focus();
+    }
+
+    // Отправка по кнопке
+    chatSend.addEventListener('click', sendMessage);
+
+    // Отправка по Enter
+    chatInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    // Простая защита от XSS
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+</script>
+{% endblock %}

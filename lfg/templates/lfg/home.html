@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}LFG - Поиск тиммейтов{% endblock %}
+{% block content %}
+<h1 class="mb-4">🔍 Поиск тиммейтов</h1>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <select class="form-select bg-dark text-light">
+            <option>Все игры</option>
+            {% for game in games %}
+            <option value="{{ game.id }}">{{ game.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+<div class="row">
+    {% for post in posts %}
+    <div class="col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ post.title }}</h5>
+                <h6 class="card-subtitle mb-2">
+                    <span class="badge">{{ post.game.name }}</span>
+                    {% if post.voice_chat_required %}
+                    <span class="badge bg-info">🎤 Голос</span>
+                    {% endif %}
+                </h6>
+                <p class="card-text">{{ post.description|truncatechars:150 }}</p>
+                <p class="card-text">
+                    <small>👤 {{ post.author.username }} | ⭐ 4.5 | {{ post.created_at|timesince }} назад</small>
+                </p>
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'lfg_detail' post.pk %}" class="btn btn-sm btn-primary">Подробнее</a>
+                <a href="{% url 'add_to_favorites' post.pk %}" class="btn btn-sm btn-outline-warning">★</a>
+                {% if user == post.author %}
+                <a href="{% url 'lfg_update' post.pk %}" class="btn btn-sm btn-secondary">✏</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info">Нет активных объявлений. <a href="{% url 'lfg_create' %}">Создайте первое!</a></div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

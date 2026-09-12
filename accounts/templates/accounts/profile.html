@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Профиль{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                {% if user.avatar %}
+                <img src="{{ user.avatar.url }}" class="rounded-circle mb-3"
+                     width="150" height="150" style="object-fit: cover;">
+                {% else %}
+                <div class="bg-secondary rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                     style="width:150px;height:150px;">
+                    <i class="bi bi-person-fill" style="font-size: 4rem;"></i>
+                </div>
+                {% endif %}
+
+                <h4>{{ user.username }}</h4>
+                <p class="text-warning">⭐ {{ user.reputation_score }}</p>
+
+                {% if user.discord_tag %}
+                <p><i class="bi bi-discord"></i> {{ user.discord_tag }}</p>
+                {% endif %}
+                {% if user.steam_id %}
+                <p><i class="bi bi-steam"></i> {{ user.steam_id }}</p>
+                {% endif %}
+                {% if user.bio %}
+                <p class="text-muted">{{ user.bio }}</p>
+                {% endif %}
+
+                <div class="d-grid gap-2 mt-3">
+                    <a href="{% url 'profile_edit' %}" class="btn btn-primary">
+                        Редактировать профиль
+                    </a>
+                    <a href="{% url 'password_change' %}" class="btn btn-outline-warning">
+                        Сменить пароль
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h4>📋 Мои объявления</h4>
+                <a href="{% url 'lfg_create' %}" class="btn btn-success mb-3">
+                    <i class="bi bi-plus-circle"></i> Создать новое
+                </a>
+
+                {% for post in user.lfg_posts.all %}
+                <div class="card bg-dark mb-2">
+                    <div class="card-body">
+                        <h6>{{ post.title }}</h6>
+                        <span class="badge">{{ post.game.name }}</span>
+                        <span class="badge">{{ post.get_status_display }}</span>
+                        <a href="{% url 'lfg_detail' post.pk %}" class="btn btn-sm btn-primary float-end">
+                            Открыть
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted">У вас пока нет объявлений.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

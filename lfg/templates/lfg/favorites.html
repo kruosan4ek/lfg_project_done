@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Избранное{% endblock %}
+{% block content %}
+<h1>⭐ Избранное</h1>
+<div class="row">
+    {% for post in posts %}
+    <div class="col-md-6 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5>{{ post.title }}</h5>
+                <a href="{% url 'lfg_detail' post.pk %}" class="btn btn-primary btn-sm">Подробнее</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p>Нет избранных объявлений.</p>
+    {% endfor %}
+</div>
+{% endblock %}

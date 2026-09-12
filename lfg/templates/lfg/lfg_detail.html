@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}{{ post.title }}{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h3>{{ post.title }}</h3>
+        <span class="badge">{{ post.game.name }}</span>
+        {% if post.required_rank %}<span class="badge">{{ post.required_rank.name }}</span>{% endif %}
+        {% if post.voice_chat_required %}<span class="badge bg-info">Голосовой чат</span>{% endif %}
+
+        <p class="mt-3">{{ post.description }}</p>
+
+        <p>
+            <strong>Автор:</strong> {{ post.author.username }}<br>
+            <strong>Создано:</strong> {{ post.created_at|date:"d.m.Y H:i" }}<br>
+            <strong>Статус:</strong> {{ post.get_status_display }}
+        </p>
+
+        {% if post.required_roles.all %}
+        <p><strong>Требуемые роли:</strong>
+            {% for role in post.required_roles.all %}
+            <span class="badge">{{ role.name }}</span>
+            {% endfor %}
+        </p>
+        {% endif %}
+
+        {% if user == post.author %}
+        <a href="{% url 'lfg_update' post.pk %}" class="btn btn-primary">Редактировать</a>
+        <a href="{% url 'lfg_delete' post.pk %}" class="btn btn-danger">Удалить</a>
+        {% endif %}
+        <a href="{% url 'home' %}" class="btn btn-secondary">Назад</a>
+    </div>
+</div>
+{% endblock %}

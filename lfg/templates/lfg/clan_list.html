@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Кланы{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">🏆 Кланы</h1>
+
+{% if user.is_authenticated %}
+<a href="{% url 'clan_create' %}" class="btn btn-success mb-3">
+    <i class="bi bi-plus-circle"></i> Создать клан
+</a>
+{% endif %}
+
+<div class="row">
+    {% for clan in clans %}
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            {% if clan.logo %}
+            <img src="{{ clan.logo.url }}" class="card-img-top"
+                 style="height: 150px; object-fit: cover;" alt="{{ clan.name }}">
+            {% else %}
+            <div class="bg-secondary d-flex align-items-center justify-content-center"
+                 style="height: 150px;">
+                <i class="bi bi-shield-fill" style="font-size: 3rem;"></i>
+            </div>
+            {% endif %}
+
+            <div class="card-body">
+                <h5 class="card-title">[{{ clan.tag }}] {{ clan.name }}</h5>
+                <p class="card-text text-muted small">
+                    <i class="bi bi-controller"></i> {{ clan.game.name }}
+                </p>
+                <p class="card-text">{{ clan.description|truncatechars:100 }}</p>
+            </div>
+
+            <div class="card-footer">
+                <a href="{% url 'clan_detail' clan.pk %}" class="btn btn-sm btn-primary">
+                    Подробнее
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info">
+            Пока нет ни одного клана. Создайте первый!
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

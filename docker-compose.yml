@@ -1,0 +1,50 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:16-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_DB: lfg_db
+      POSTGRES_USER: lfg_user
+      POSTGRES_PASSWORD: lfg_password
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lfg_user -d lfg_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  web:
+    build: .
+    command: daphne -b 0.0.0.0 -p 8000 config.asgi:application
+    volumes:
+      - .:/app
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=dev-secret-key-change-me
+      - DB_NAME=lfg_db
+      - DB_USER=lfg_user
+      - DB_PASSWORD=lfg_password
+      - DB_HOST=db
+      - DB_PORT=5432
+      - REDIS_HOST=redis
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+volumes:
+  postgres_data:
+  media_volume:

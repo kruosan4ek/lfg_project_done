@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{{ clan.name }}{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h3>[{{ clan.tag }}] {{ clan.name }}</h3>
+        <p><strong>Игра:</strong> {{ clan.game.name }}</p>
+        <p><strong>Лидер:</strong> {{ clan.leader.username }}</p>
+        <p>{{ clan.description }}</p>
+        <h5>Участники ({{ memberships.count }})</h5>
+        <ul>
+            {% for membership in memberships %}
+            <li>{{ membership.user.username }} - {{ membership.get_role_display }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
